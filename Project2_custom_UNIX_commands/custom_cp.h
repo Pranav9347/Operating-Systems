@@ -86,7 +86,7 @@ void copy_directory(const char *src_dir, const char *dst_dir) {
 int custom_cp(int argc, char* argv[])
 {
 	// receieve mininmum two args(and an optional flag field):
-	if(argc < 3 || strcmp(argv[0],"./custom_cp")!=0)
+	if(argc < 3 || strcmp(argv[0],"custom_cp")!=0)
 	{
 		printf("Usage: custom_cp [options] src dest\n");
 		return 1;

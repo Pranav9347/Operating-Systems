@@ -6,17 +6,21 @@
 #include <ctype.h>
 #include "custom_rm.h"
 #include "custom_wc.h"
+#include "custom_grep.h"
+#include "custom_cp.h"
+#include "custom_cat.h"
+#include "custom_mv.h"
 #define MAX_CMD_LEN 1024  // Increase the size to allow for larger commands
 #define MAX_ARGS 100      // Max number of arguments for a command
 
 // Function to print the prompt
 void custom_prompt() {
-	static int count = 0;
-	if(count == 0)
-	{	
-		printf("----------Custom Linux Shell----------\n");
-		count++;
-	}
+    static int count = 0;
+    if(count == 0)
+    {   
+        printf("----------Custom Linux Shell----------\n");
+        count++;
+    }
     printf(">> ");  
 }
 
@@ -42,7 +46,9 @@ int lsh_parse(char *input, char *args[]) {
 
 
 // Function to execute the parsed command
-void execute_command(char *args[]) {
+void execute_command(char *args[],int argc) {
+    //printf("hi");
+    //printf("Checking args[0]: '%s'\n", args[0]);
     if (strcmp(args[0], "exit") == 0) {
         exit(0);  // Exit the shell
     }
@@ -50,7 +56,7 @@ void execute_command(char *args[]) {
     // Handle wc command
     if (strcmp(args[0], "custom_wc") == 0) {
         if (args[1] == NULL) {
-            fprintf(stderr, "Usage: wc <filename>\n"); //for giving the instruction of error message for the stderr (error case)
+            fprintf(stderr, "Usage: custom_wc <filename>\n"); //for giving the instruction of error message for the stderr (error case)
         } else {
             custom_wc(args[1]);  // Call the  wc function
         }
@@ -60,9 +66,49 @@ void execute_command(char *args[]) {
     // Handle rm command
     if (strcmp(args[0], "custom_rm") == 0) {
         if (args[1] == NULL) {
-            fprintf(stderr, "Usage: rm <filename>\n"); //for giving the instruction of error message for the stderr (error case)
+            fprintf(stderr, "Usage: custom_rm [-r] <file/dir>\n"); //for giving the instruction of error message for the stderr (error case)
         } else {
-            custom_rm(args[1]);  // Call the  rm function
+            custom_rm(argc,args);  // Call the  rm function
+        }
+        return;
+    }
+
+    // Handle grep command
+    if (strcmp(args[0], "custom_grep") == 0) {
+        if (args[1] == NULL) {
+            fprintf(stderr, "Usage: custom_grep \"pattern\" <filename>\n"); //for giving the instruction of error message for the stderr (error case)
+        } else {
+            custom_grep(argc,args);  // Call the  rm function
+        }
+        return;
+    }
+
+    // Handle cat command
+    if (strcmp(args[0], "custom_cat") == 0) {
+        if (args[1] == NULL) {
+            fprintf(stderr, "Usage: custom_cat [-n] <file1> [file2...]\n"); //for giving the instruction of error message for the stderr (error case)
+        } else {
+            custom_cat(argc,args);  // Call the  rm function
+        }
+        return;
+    }
+
+    // Handle cp command
+    if (strcmp(args[0], "custom_cp") == 0) {
+        if (args[1] == NULL) {
+            fprintf(stderr, "Usage: custom_cp [-r] <src> <dest>\n"); //for giving the instruction of error message for the stderr (error case)
+        } else {
+            custom_cp(argc,args);  // Call the  rm function
+        }
+        return;
+    }
+
+    // Handle mv command
+    if (strcmp(args[0], "custom_mv") == 0) {
+        if (args[1] == NULL) {
+            fprintf(stderr, "Usage: custom_mv <src> <dest>\n"); //for giving the instruction of error message for the stderr (error case)
+        } else {
+            custom_mv(argc,args);  // Call the  rm function
         }
         return;
     }
@@ -100,7 +146,7 @@ int main() {
         
         // If there are arguments, execute the command
         if (num_args > 0) {
-            execute_command(args);
+            execute_command(args,num_args);
         }
     }
 

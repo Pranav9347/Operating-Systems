@@ -1,3 +1,4 @@
+//include guards
 #ifndef CUSTOM_GREP_H
 #define CUSTOM_GREP_H
 
@@ -35,17 +36,17 @@ int containsPattern(const char* line,const char* pattern,int ignoreCase)
 
 int custom_grep(int argc,char* argv[])
 {
-	if(argc<3 || strcmp(argv[0],"./custom_grep")!=0)
+	if(argc<3 || strcmp(argv[0],"custom_grep")!=0)
 	{
-		printf("Usage: custom_grep [OPTIONS] pattern dest\n");
+		printf("Usage: custom_grep [-i] pattern dest\n");
 		return 1;
 	}
 
 	char *pattern,*src,buffer[BUFFER_SIZE],line[MAX_LINE_LENGTH];
 
 	pattern=(char*)malloc((strlen(argv[argc-2])+1)*sizeof(char));
-	strcpy(pattern,argv[argc-2]);
-    pattern[strlen(argv[argc-2])]='\0';
+	strcpy(pattern,argv[argc-2]+1);
+    pattern[strlen(argv[argc-2])-2]='\0';
     printf("\nPATTERN=%s\n",pattern);
 
 	src=(char*)malloc((strlen(argv[argc-1])+1)*sizeof(char));
