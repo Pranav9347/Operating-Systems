@@ -25,6 +25,7 @@ This is a collaboration project where we modify or add new features to the xv6 O
 * Locks-semaphores: Pranav Vijay Nadgir
 * Signals: Krishna Karthik
 * Threads: Prabhas Dhanikonda
+* IPC-Message Passing: Nitish R Naik 
 
 
 ### Customizing unix-commands:
