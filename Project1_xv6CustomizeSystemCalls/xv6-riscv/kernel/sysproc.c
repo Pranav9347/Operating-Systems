@@ -30,6 +30,15 @@ sys_fork(void)
 }
 
 uint64
+sys_getppid(void)
+{
+    struct proc *p = myproc();  // Get the current process
+    if (p->parent)
+        return p->parent->pid; // Return parent's PID
+    return -1;                 // Return -1 if no parent exists (init process)
+}
+
+uint64
 sys_wait(void)
 {
   uint64 p;

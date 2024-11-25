@@ -1,3 +1,6 @@
+struct stat;
+
+// system calls
 #ifndef USER_H
 #define USER_H
 #include "../kernel/types.h" 
@@ -31,6 +34,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int getppid(void);
 // Declaration of system calls for semaphores
 int sem_initialize(struct sem *s, int value);
 void sem_up(struct sem *s);
