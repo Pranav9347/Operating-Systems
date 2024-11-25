@@ -36,9 +36,6 @@ entry("getpid");
 entry("sbrk");
 entry("sleep");
 entry("uptime");
-<<<<<<< HEAD
-entry("getprocstate")
-=======
-entry("getppid")
+entry("getprocstate");
+entry("getppid");
 
->>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0
