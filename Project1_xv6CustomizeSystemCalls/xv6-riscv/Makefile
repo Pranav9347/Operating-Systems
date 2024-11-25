@@ -185,7 +185,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-	$U/_test
+	$U/_test\
 	$U/_tt1\
 	$U/_clear\
 	$U/_user_sem_prog\
