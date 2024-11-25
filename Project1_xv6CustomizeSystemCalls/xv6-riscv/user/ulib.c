@@ -2,6 +2,10 @@
 #include "kernel/stat.h"
 #include "kernel/fcntl.h"
 #include "user/user.h"
+<<<<<<< HEAD
+=======
+#include <stdarg.h>
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0
 
 //
 // wrapper so that it's OK if main() does not call exit().
@@ -145,3 +149,38 @@ memcpy(void *dst, const void *src, uint n)
 {
   return memmove(dst, src, n);
 }
+<<<<<<< HEAD
+=======
+
+// Trap into kernel space for system calls
+int syscall(int num, ...) {
+    uint64 args[6];
+    va_list ap;
+    int i;
+
+    // Retrieve variable arguments passed to syscall
+    va_start(ap, num);
+    for (i = 0; i < 6; i++) {
+        args[i] = va_arg(ap, uint64);
+    }
+    va_end(ap);
+
+    // Place the system call number in a7, arguments in a0-a5
+    register uint64 a0 asm("a0") = args[0];
+    register uint64 a1 asm("a1") = args[1];
+    register uint64 a2 asm("a2") = args[2];
+    register uint64 a3 asm("a3") = args[3];
+    register uint64 a4 asm("a4") = args[4];
+    register uint64 a5 asm("a5") = args[5];
+    register uint64 a7 asm("a7") = num;
+
+    // Perform the ecall (traps into kernel space)
+    asm volatile("ecall"
+                 : "+r"(a0)
+                 : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(a7)
+                 : "memory");
+
+    // Return value is stored in a0 after the trap
+    return a0;
+}
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0
