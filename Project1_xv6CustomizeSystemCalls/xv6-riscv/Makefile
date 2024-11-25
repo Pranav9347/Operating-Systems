@@ -32,7 +32,7 @@ OBJS = \
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
-#TOOLPREFIX = 
+TOOLPREFIX = riscv64-linux-gnu-
 
 # Try to infer the correct TOOLPREFIX if not set
 ifndef TOOLPREFIX
@@ -69,6 +69,8 @@ CFLAGS += -fno-builtin-memcpy -Wno-main
 CFLAGS += -fno-builtin-printf -fno-builtin-fprintf -fno-builtin-vprintf
 CFLAGS += -I.
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+CFLAGS += -I/usr/lib/gcc-cross/riscv64-linux-gnu/11/include/
+
 
 # Disable PIE when possible (for Ubuntu 16.10 toolchain)
 ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
@@ -122,6 +124,33 @@ $U/printf.o: $U/printf.c
 	$(CC) $(CFLAGS) -c -o $U/printf.o $U/printf.c
 
 	
+user/clear.o: user/clear.c
+	$(CC) $(CFLAGS) -c -o user/clear.o user/clear.c
+
+user/clear: user/clear.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+	$(LD) $(LDFLAGS) -T user/user.ld -o $@ $^
+
+$U/semaphore.o: $U/semaphore.c
+	$(CC) $(CFLAGS) -c -o $U/semaphore.o $U/semaphore.c
+
+user/user_sem_prog.o: user/user_sem_prog.c
+	$(CC) $(CFLAGS) -c -o user/user_sem_prog.o user/user_sem_prog.c
+
+user/_user_sem_prog: user/user_sem_prog.o user/semaphore.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+	$(LD) $(LDFLAGS) -T user/user.ld -o $@ $^
+
+user/proc1.o: user/proc1.c
+	$(CC) $(CFLAGS) -c -o user/proc1.o user/proc1.c
+
+user/proc1: user/proc1.o user/semaphore.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+	$(LD) $(LDFLAGS) -T user/user.ld -o $@ $^
+
+user/proc2.o: user/proc2.c
+	$(CC) $(CFLAGS) -c -o user/proc2.o user/proc2.c
+
+user/proc2: user/proc2.o user/semaphore.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+	$(LD) $(LDFLAGS) -T user/user.ld -o $@ $^
+
 
 mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 	gcc -Werror -Wall -I. -o mkfs/mkfs mkfs/mkfs.c
@@ -150,6 +179,10 @@ UPROGS=\
 	$U/_wc\
 	$U/_zombie\
 	$U/_tt1\
+	$U/_clear\
+	$U/_user_sem_prog\
+	$U/_proc1\
+	$U/_proc2\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
@@ -189,3 +222,5 @@ qemu-gdb: $K/kernel .gdbinit fs.img
 	@echo "*** Now run 'gdb' in another window." 1>&2
 	$(QEMU) $(QEMUOPTS) -S $(QEMUGDB)
 
+#$(info TOOLPREFIX=$(TOOLPREFIX))
+#$(info CC=$(CC))

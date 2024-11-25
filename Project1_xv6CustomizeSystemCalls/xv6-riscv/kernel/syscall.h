@@ -21,3 +21,6 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_getppid 22
+#define SYS_sem_init 23
+#define SYS_sem_up 24
+#define SYS_sem_down 25
