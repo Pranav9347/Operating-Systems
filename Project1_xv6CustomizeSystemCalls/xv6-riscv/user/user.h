@@ -1,6 +1,8 @@
 struct stat;
 
 // system calls
+<<<<<<< HEAD
+=======
 #ifndef USER_H
 #define USER_H
 #include "../kernel/types.h" 
@@ -13,6 +15,7 @@ struct sem {
 
 // system calls
 int syscall(int num, ...);
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0
 int fork(void);
 int exit(int) __attribute__((noreturn));
 int wait(int*);
@@ -34,12 +37,16 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+<<<<<<< HEAD
+int getprocstate(void);
+=======
 int getppid(void);
 // Declaration of system calls for semaphores
 int sem_initialize(struct sem *s, int value);
 void sem_up(struct sem *s);
 void sem_down(struct sem *s);
 
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
@@ -58,5 +65,8 @@ void *memcpy(void *, const void *, uint);
 // umalloc.c
 void* malloc(uint);
 void free(void*);
+<<<<<<< HEAD
+=======
 
 #endif
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0

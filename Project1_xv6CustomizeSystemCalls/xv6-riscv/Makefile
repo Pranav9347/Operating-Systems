@@ -115,6 +115,13 @@ $U/_forktest: $U/forktest.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_forktest $U/forktest.o $U/ulib.o $U/usys.o
 	$(OBJDUMP) -S $U/_forktest > $U/forktest.asm
 
+$U/_test: $U/test.o $(ULIB)
+	$(LD) $(LDFLAGS) -T $U/user.ld -o $@ $^
+	$(OBJDUMP) -S $@ > $U/test.asm
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $U/test.sym
+
+$U/test.o: $U/test.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 $U/_tt1: $U/tt1.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_tt1 $U/tt1.o $(ULIB)
 	$(OBJDUMP) -S $U/_tt1 > $U/tt1.asm
@@ -178,6 +185,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
+	$U/_test
 	$U/_tt1\
 	$U/_clear\
 	$U/_user_sem_prog\

@@ -2,7 +2,10 @@
 #include "kernel/stat.h"
 #include "kernel/fcntl.h"
 #include "user/user.h"
+<<<<<<< HEAD
+=======
 #include <stdarg.h>
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0
 
 //
 // wrapper so that it's OK if main() does not call exit().
@@ -146,6 +149,8 @@ memcpy(void *dst, const void *src, uint n)
 {
   return memmove(dst, src, n);
 }
+<<<<<<< HEAD
+=======
 
 // Trap into kernel space for system calls
 int syscall(int num, ...) {
@@ -178,3 +183,4 @@ int syscall(int num, ...) {
     // Return value is stored in a0 after the trap
     return a0;
 }
+>>>>>>> 1e9c6e6075b30af2cd52e46205e953d814624dc0

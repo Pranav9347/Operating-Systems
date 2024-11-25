@@ -26,6 +26,47 @@ extern char trampoline[]; // trampoline.S
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
+
+int
+sys_getprocstate(void)
+{
+    struct proc *parent_proc = myproc(); // Get the current process (parent)
+    if (parent_proc == 0) {
+        return -1; // Error if the current process is not valid
+    }
+
+    int parent_pid = parent_proc->pid; // Get the PID of the parent (current process)
+
+    struct proc *p;
+    int state;
+    int found_child = 0;
+
+    // Traverse all processes to check for children of the given parent PID
+    for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+
+        // Check if the process's parent matches the parent_pid
+        if (p->parent != 0 && p->parent->pid == parent_pid) {
+            // Found a child process, return its state
+            state = p->state;
+            release(&p->lock);
+            printf("Child PID %d State: %d\n", p->pid, state);
+            found_child = 1;
+        }
+        else {
+            release(&p->lock);
+        }
+    }
+
+    if (!found_child) {
+        return -1; // No child processes found for this parent
+    }
+
+    return 0; // Success: states of child processes printed
+}
+
+
+
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
