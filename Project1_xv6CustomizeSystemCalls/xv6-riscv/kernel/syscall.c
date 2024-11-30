@@ -7,6 +7,9 @@
 #include "syscall.h"
 #include "defs.h"
 
+extern uint64 sys_send_message(int, int, char*);
+extern uint64 sys_receive_message(int msg_type, char *received_msg);
+
 // Fetch the uint64 at addr from the current process.
 int
 fetchaddr(uint64 addr, uint64 *ip)
@@ -28,6 +31,30 @@ fetchstr(uint64 addr, char *buf, int max)
   if(copyinstr(p->pagetable, buf, addr, max) < 0)
     return -1;
   return strlen(buf);
+}
+
+uint64 sys_send_message_wrapper(void) {
+    int pid, msg_type;
+    char msg[128];
+
+    // Fetch arguments
+    argint(0, &pid);
+    argint(1, &msg_type);
+    argstr(2, msg, sizeof(msg));
+
+    // Call the actual function
+    return sys_send_message(pid, msg_type, msg);
+}
+
+uint64 sys_receive_message_wrapper(void) {
+    int msg_type;
+    char received_msg[128];
+
+    // Fetch arguments
+    argint(0, &msg_type);
+
+    // Call the actual function
+    return sys_receive_message(msg_type, received_msg);
 }
 
 static uint64
@@ -101,6 +128,7 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
+
 extern uint64 sys_getprocstate(void);
 extern uint64 sys_getppid(void);
 extern uint64 sys_sem_init(void);
@@ -130,13 +158,19 @@ static uint64 (*syscalls[])(void) = {
 [SYS_unlink]  sys_unlink,
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
-[SYS_getprocstate]   sys_getprocstate,
 [SYS_close]   sys_close,
+[SYS_sys_send_message]     sys_send_message_wrapper,
+[SYS_sys_receive_message]  sys_receive_message_wrapper,
+[SYS_getprocstate]   sys_getprocstate,
 [SYS_getppid] sys_getppid,
 [SYS_sem_init] sys_sem_init,
 [SYS_sem_up]  sys_sem_up,
 [SYS_sem_down] sys_sem_down,
 };
+
+
+
+
 
 void
 syscall(void)
@@ -145,13 +179,41 @@ syscall(void)
   struct proc *p = myproc();
 
   num = p->trapframe->a7;
-  if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    // Use num to lookup the system call function for num, call it,
-    // and store its return value in p->trapframe->a0
-    p->trapframe->a0 = syscalls[num]();
+
+
+  // Check if the syscall number is valid
+  if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    // Handle sys_send_message
+    if (num == SYS_sys_send_message) {
+      int pid, msg_type;
+      char msg[128];  // Static buffer for message content
+
+      // Fetch arguments for sys_send_message
+      argint(0, &pid);          // Process ID
+      argint(1, &msg_type);     // Message type
+      argstr(2, msg, 128);      // Message content
+
+      // Call sys_send_message and store the result
+      p->trapframe->a0 = sys_send_message(pid, msg_type, msg);
+    } 
+    // Handle sys_receive_message
+    else if (num == SYS_sys_receive_message) {
+      int msg_type;
+      char received_msg[128];  // Static buffer for received message
+      
+      // Fetch arguments for sys_receive_message
+      argint(0, &msg_type);     // Message type
+
+      // Call sys_receive_message and store the result
+      p->trapframe->a0 = sys_receive_message(msg_type, received_msg);
+    } 
+    // Handle other syscalls
+    else {
+      p->trapframe->a0 = syscalls[num]();
+    }
   } else {
-    printf("%d %s: unknown sys call %d\n",
-            p->pid, p->name, num);
+    // Handle invalid system call number
+    printf("%d %s: unknown sys call %d\n", p->pid, p->name, num);
     p->trapframe->a0 = -1;
   }
 }

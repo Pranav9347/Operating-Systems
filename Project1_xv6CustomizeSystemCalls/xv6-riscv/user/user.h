@@ -1,9 +1,12 @@
-struct stat;
-
-// system calls
 #ifndef USER_H
 #define USER_H
 #include "../kernel/types.h" 
+#define SYS_send_message 22
+#define SYS_receive_message 23
+
+
+
+
 
 struct stat;
 struct sem {
@@ -34,6 +37,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int sys_send_message(int, int, char*);
+int sys_receive_message(int, char*);
 int getprocstate(void);
 int getppid(void);
 // Declaration of system calls for semaphores
@@ -50,6 +55,15 @@ int strcmp(const char*, const char*);
 void fprintf(int, const char*, ...) __attribute__ ((format (printf, 2, 3)));
 void printf(const char*, ...) __attribute__ ((format (printf, 1, 2)));
 char* gets(char*, int max);
+unsigned int strlen(const char*);
+void* memset(void*, int, unsigned int);
+int atoi(const char*);
+int memcmp(const void *, const void *, unsigned int);
+void *memcpy(void *, const void *, unsigned int);
+
+// umalloc.c
+void* malloc(unsigned int);
+void free(void*);
 uint strlen(const char*);
 void* memset(void*, int, uint);
 int atoi(const char*);

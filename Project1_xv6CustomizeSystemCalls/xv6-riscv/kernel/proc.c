@@ -6,6 +6,8 @@
 #include "proc.h"
 #include "defs.h"
 
+struct msg_queue global_msg_queue;
+struct spinlock global_queue_lock;
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -25,6 +27,21 @@ extern char trampoline[]; // trampoline.S
 // memory model when using p->parent.
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
+
+struct spinlock ptable_lock;
+void init_msg_queue(struct msg_queue *queue);
+int send_message(struct msg_queue *queue, struct msg *message);
+int receive_message(struct msg_queue *queue, struct msg *message);
+
+
+struct msg_queue global_msg_queue;
+struct spinlock global_queue_lock;
+
+// Initialization function for global message queue
+void init_global_msg_queue() {
+    initlock(&global_queue_lock, "global_queue_lock");
+    memset(&global_msg_queue, 0, sizeof(global_msg_queue));  // Initialize the queue
+}
 
 
 int
@@ -89,10 +106,13 @@ void
 procinit(void)
 {
   struct proc *p;
-  
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
+ initlock(&ptable_lock, "ptable");
+ init_global_msg_queue(); 
+
   for(p = proc; p < &proc[NPROC]; p++) {
+      init_msg_queue(&p->msg_queue);
       initlock(&p->lock, "proc");
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
@@ -154,6 +174,8 @@ allocproc(void)
 
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
+    p->msg_queue.head = 0;
+    p->msg_queue.tail = 0;
     if(p->state == UNUSED) {
       goto found;
     } else {
@@ -733,4 +755,56 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+// Initialize message queue
+void init_msg_queue(struct msg_queue *queue) {
+    queue->head = 0;
+    queue->tail = 0;
+    initlock(&queue->lock, "msg_queue");
+}
+
+// Check if the message queue is full
+int msg_queue_full(struct msg_queue *queue) {
+    return ((queue->tail + 1) % MAX_MSGS) == queue->head;
+}
+
+// Check if the message queue is empty
+int msg_queue_empty(struct msg_queue *queue) {
+    return queue->head == queue->tail;
+}
+
+int send_message(struct msg_queue *queue, struct msg *message) {
+    acquire(&global_queue_lock);  // Lock the global queue before interacting
+
+    // Check if the queue is full
+    if (msg_queue_full(&global_msg_queue)) {
+        release(&global_queue_lock);
+        return -1;  // Queue is full, cannot send the message
+    }
+
+    // Add the message to the queue
+    global_msg_queue.msgs[global_msg_queue.tail] = *message;
+    global_msg_queue.tail = (global_msg_queue.tail + 1) % MAX_MSGS;  // Wrap tail if necessary
+
+    release(&global_queue_lock);  // Release lock after modifying the queue
+    return 0;  // Successfully sent the message
+}
+
+// Modified receive_message function that uses global message queue
+int receive_message(struct msg_queue *queue, struct msg *message) {
+    acquire(&global_queue_lock);  // Lock the global queue before interacting
+
+    // Check if the queue is empty
+    if (msg_queue_empty(&global_msg_queue)) {
+        release(&global_queue_lock);
+        return -1;  // No messages available in the queue
+    }
+
+    // Retrieve the message from the queue
+    *message = global_msg_queue.msgs[global_msg_queue.head];
+    global_msg_queue.head = (global_msg_queue.head + 1) % MAX_MSGS;  // Wrap head if necessary
+
+    release(&global_queue_lock);  // Release lock after modifying the queue
+    return 0;  // Successfully received the message
 }

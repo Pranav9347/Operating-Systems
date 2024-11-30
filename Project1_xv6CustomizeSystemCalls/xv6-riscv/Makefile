@@ -185,6 +185,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
+	$U/_msgtest\
 	$U/_test\
 	$U/_tt1\
 	$U/_clear\

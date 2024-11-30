@@ -1,4 +1,23 @@
 // Saved registers for kernel context switches.
+//#include "spinlock.h"
+#define MAX_MSGS 10
+#define MSG_SIZE 128
+
+struct msg{
+  int msg_type;
+  char content[MSG_SIZE];
+};
+
+struct msg_queue{
+  struct msg msgs[MAX_MSGS];
+  int head,tail;
+  struct spinlock lock;
+};
+
+extern struct msg_queue global_msg_queue;
+extern struct spinlock global_queue_lock;
+
+
 struct context {
   uint64 ra;
   uint64 sp;
@@ -84,6 +103,7 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 // Per-process state
 struct proc {
   struct spinlock lock;
+  struct msg_queue msg_queue;
 
   // p->lock must be held when using these:
   enum procstate state;        // Process state
