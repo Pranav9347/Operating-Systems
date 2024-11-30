@@ -32,7 +32,7 @@ sem_up(&mySem);
 
 ## Usage of semaphores:
 ### Using as a mutex lock:
-```
+```c
 	struct sem mySem;  // Declare a semaphore
     int value = 1;     // Initial value of the semaphore (you can choose based on your needs)
     // Initialize the semaphore
@@ -53,7 +53,7 @@ sem_up(&mySem);
 ![semaphores](pics/semaphores.png "semaphores")
 
 ### Counting action of semaphore:
-```
+```c
     int value = 3;     // Initial value of the semaphore (you can choose based on your needs)
 
     // Initialize the semaphore
@@ -89,40 +89,41 @@ The `getprocstate` system call is designed to allow a parent process to query th
 ### Kernel Modifications
 
 **File: `proc.c`**
-    - **Functionality**:
-        - The `sys_getprocstate` function iterates through the process table to find child processes of the current process (`myproc`).
-        - For each child process found, its state is printed using `printf`.
-        - If no child processes exist, the function returns `-1`.
-        - Locks (`acquire`/`release`) ensure safe access to process data.
-    - **Code**:
-      ```c
-      int sys_getprocstate(void) {
-          struct proc *parent_proc = myproc(); // Get current process
-          if (parent_proc == 0) return -1;
+- **Functionality**:
+    - The `sys_getprocstate` function iterates through the process table to find child processes of the current process (`myproc`).
+    - For each child process found, its state is printed using `printf`.
+    - If no child processes exist, the function returns `-1`.
+    - Locks (`acquire`/`release`) ensure safe access to process data.
 
-          int parent_pid = parent_proc->pid;
-          struct proc *p;
-          int state;
-          int found_child = 0;
+- **Code:**
+```c
+int sys_getprocstate(void) {
+    struct proc *parent_proc = myproc(); // Get current process
+    if (parent_proc == 0) return -1;
 
-          for (p = proc; p < &proc[NPROC]; p++) {
-              acquire(&p->lock);
-              if (p->parent != 0 && p->parent->pid == parent_pid) {
-                  state = p->state;
-                  release(&p->lock);
-                  printf("Child PID %d State: %d\n", p->pid, state);
-                  found_child = 1;
-              } else {
-                  release(&p->lock);
-              }
-          }
+    int parent_pid = parent_proc->pid;
+    struct proc *p;
+    int state;
+    int found_child = 0;
 
-          if (!found_child) return -1; // No child found
-          return 0;
-      }
-      ```
+    for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if (p->parent != 0 && p->parent->pid == parent_pid) {
+            state = p->state;
+            release(&p->lock);
+            printf("Child PID %d State: %d\n", p->pid, state);
+            found_child = 1;
+        } else {
+            release(&p->lock);
+        }
+    }
 
-### Testing Environment
+    if (!found_child) return -1; // No child found
+    return 0;
+}
+```
+
+### Testing
 
 #### File: `test.c`
 - A user program was written to test `getprocstate`.
@@ -184,8 +185,4 @@ The `getprocstate` system call is designed to allow a parent process to query th
     - After running the test program, the states of the child processes were printed as expected, confirming correct functionality.
     ![getprocstate system call](pics/op.png "OUTPUT")
 ---
-
-## Conclusion
-
-The `getprocstate` system call was successfully implemented. It integrates seamlessly into the kernel and provides a robust way for parent processes to monitor their child processes. Proper synchronization ensures safe access to process data, making it reliable and efficient.
-
+## Project by: Krishna Kartik Vallam
