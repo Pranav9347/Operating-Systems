@@ -1,0 +1,94 @@
+make report on my system call "getprocstate" based on the code snippets added to files mentioned below .modified code added for proc.c file :"int
+sys_getprocstate(void)
+{
+    struct proc *parent_proc = myproc(); // Get the current process (parent)
+    if (parent_proc == 0) {
+        return -1; // Error if the current process is not valid
+    }
+
+    int parent_pid = parent_proc->pid; // Get the PID of the parent (current process)
+
+    struct proc *p;
+    int state;
+    int found_child = 0;
+
+    // Traverse all processes to check for children of the given parent PID
+    for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+
+        // Check if the process's parent matches the parent_pid
+        if (p->parent != 0 && p->parent->pid == parent_pid) {
+            // Found a child process, return its state
+            state = p->state;
+            release(&p->lock);
+            printf("Child PID %d State: %d\n", p->pid, state);
+            found_child = 1;
+        }
+        else {
+            release(&p->lock);
+        }
+    }
+
+    if (!found_child) {
+        return -1; // No child processes found for this parent
+    }
+
+    return 0; // Success: states of child processes printed
+}
+". modified code added for the syscall.c:"extern uint64 sys_getprocstate(void);
+""[SYS_getprocstate]   sys_getprocstate,".modified code added for the syscall.h:"#define SYS_getprocstate 22
+".modified code added for the file user.h:"int getprocstate(void);
+".modified code added for the file usys.pl:"entry("getprocstate")
+".modified code added for the file Makefile:"$U/_test: $U/test.o $(ULIB)
+	$(LD) $(LDFLAGS) -T $U/user.ld -o $@ $^
+	$(OBJDUMP) -S $@ > $U/test.asm
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $U/test.sym
+
+$U/test.o: $U/test.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+".user program to demonstrate the system call getprocstate:"#include "./kernel/types.h"
+#include "user.h"
+
+// Declare the system call for process state
+int getprocstate(void);  // We declared this in user.h and sys_getprocstate is implemented in the kernel.
+
+int main(void) {
+    int pid1, pid2;
+
+    // Create first child process
+    pid1 = fork();
+    if (pid1 < 0) {
+        printf("Fork failed!\n");
+        exit(1);
+    }
+    
+    if (pid1 == 0) {
+        // Child process 1
+        sleep(5);
+        exit(1);
+    }
+
+    // Create second child process
+    pid2 = fork();
+    if (pid2 < 0) {
+        printf("Fork failed!\n");
+        exit(1);
+    }
+    
+    if (pid2 == 0) {
+        // Child process 2
+        sleep(5);
+        exit(1);
+    }
+
+    // Parent process
+    
+    getprocstate();  // This should print the states of child processes.
+
+    // Wait for children to finish
+    wait(0);
+    wait(0);
+
+    exit(1);  // Exit the parent process
+}
+"

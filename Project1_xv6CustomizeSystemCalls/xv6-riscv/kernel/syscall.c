@@ -129,6 +129,11 @@ extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 
+extern uint64 sys_getprocstate(void);
+extern uint64 sys_getppid(void);
+extern uint64 sys_sem_init(void);
+extern uint64 sys_sem_up(void);
+extern uint64 sys_sem_down(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -156,14 +161,25 @@ static uint64 (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_sys_send_message]     sys_send_message_wrapper,
 [SYS_sys_receive_message]  sys_receive_message_wrapper,
+[SYS_getprocstate]   sys_getprocstate,
+[SYS_getppid] sys_getppid,
+[SYS_sem_init] sys_sem_init,
+[SYS_sem_up]  sys_sem_up,
+[SYS_sem_down] sys_sem_down,
 };
 
-void syscall(void)
+
+
+
+
+void
+syscall(void)
 {
   int num;
   struct proc *p = myproc();
 
   num = p->trapframe->a7;
+
 
   // Check if the syscall number is valid
   if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {

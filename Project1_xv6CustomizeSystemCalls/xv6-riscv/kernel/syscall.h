@@ -22,3 +22,8 @@
 #define SYS_close  21
 #define SYS_sys_send_message 22
 #define SYS_sys_receive_message 23
+#define SYS_getprocstate 24
+#define SYS_getppid 25
+#define SYS_sem_init 26
+#define SYS_sem_up 27
+#define SYS_sem_down 28

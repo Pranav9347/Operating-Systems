@@ -38,3 +38,6 @@ entry("sleep");
 entry("uptime");
 entry("sys_send_message");
 entry("sys_receive_message");
+entry("getprocstate");
+entry("getppid");
+

@@ -28,3 +28,24 @@ Example:\
  - D has a file which is also in A
  - '-r' flag is necessary for dir to dir copy
  - contents of A is then recursively copied to D as shown
+
+ custom_cat commands:
+Usage custom_cat [-n] filename
+
+Functionalities:
+
+1. View File Content:
+   Display the contents of one or more files to standard output (console).
+   Example: cat file.txt
+   ![OUTPUT](./pics/display_file.png)
+
+2. Concatenate Files:
+   Combine multiple files and display their combined content.
+   Example: cat file1.txt file2.txt > merged.txt. 
+   file1.txt and file2.txt both text files are merged and printing output.  
+   ![OUTPUT](./pics/concatenate2files.png)
+
+3. Number Lines in Output:
+   Display line numbers in the output.  
+   Example: cat -n file.txt.  
+   ![OUTPUT](./pics/displaylinenos.png)
