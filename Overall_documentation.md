@@ -22,14 +22,14 @@ This is a collaboration project where we modify or add new features to the xv6 O
 
 ## Contributions:
 ### xv6 Operating System:
-* Locks-semaphores: Pranav Vijay Nadgir
-* Get process state: Krishna Karthik
-* Get parent process ID: Prabhas Dhanikonda
-* IPC-Message Passing: Nitish R Naik 
+* Locks-semaphores: Pranav Vijay Nadgir (CS22B1034)
+* Get process state: Krishna Karthik (CS22B1001)
+* Get parent process ID: Prabhas Dhanikonda (CS22B1002)
+* IPC-Message Passing: Nitish R Naik (CS22B1035)
 
 
 ### Customizing unix-commands:
-* Shell program, custom_wc, custom_rm: Nitish R Naik
-* custom_cp, custom_mv: Pranav Nadgir
-* custom_grep: Krishna Karthik
-* custom_cat: Prabhas Dhanikonda
+* Shell program, custom_wc, custom_rm: Nitish R Naik (CS22B1035)
+* custom_cp, custom_mv: Pranav Nadgir (CS22B1034)
+* custom_grep: Krishna Karthik (CS22B1001)
+* custom_cat: Prabhas Dhanikonda (CS22B1002)
